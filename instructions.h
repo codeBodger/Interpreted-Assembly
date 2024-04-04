@@ -18,10 +18,15 @@
 #define NAND_ 0b01110 // NAND_
 #define NOR__ 0b01111 // NOR__
 
+#define DRAW2 0b10000 // draw_reg.reg_xxx [set the pixel at [.reg][x] to the colour in reg]
+#define DRAW3 0b10001 // draw_reg_yyy-reg [set the pixel at [y][-reg] to the colour in reg]
+#define IF_GO 0b10010 // if___regCodeLine [if (reg) goto CodeLine]
+#define _____ 0b10011 //
+
 #define PUSH_ 0b11000 // push_reg________ [push the value in reg onto the stack]
 #define POP__ 0b11001 // pop__reg________ [pop the first value off of the stack and put it into reg]
 #define DRAW_ 0b11010 // draw_reg_yyy_xxx [set the pixel at [y][x] to the colour in reg]
-#define _____ 0b11011 //
+#define DRAW1 0b11011 // drawrreg.reg-reg [set the pixel at [.reg][-reg] to the colour in reg]
 
 #define NIF__ 0b11100 // nIf__regCodeLine [if (!reg) goto CodeLine]
 #define GOTO_ 0b11101 // GoTo____CodeLine [goto CodeLine]

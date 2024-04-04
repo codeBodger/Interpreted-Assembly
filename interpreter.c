@@ -46,10 +46,15 @@ int main() {
             case NAND_: // NAND_
             case NOR__: // NOR__
 
+            case DRAW2: // draw_reg.reg_xxx [set the pixel at [.reg][x] to the colour in reg]
+            case DRAW3: // draw_reg_yyy-reg [set the pixel at [y][-reg] to the colour in reg]
+            case IF_GO: // if___regCodeLine [if (reg) goto CodeLine]
+            case _____: //
+
             case PUSH_: // push_reg________ [push the value in reg onto the stack]
             case POP__: // pop__reg________ [pop the first value off of the stack and put it into reg]
-            case _____: //
-            case _____: //
+            case DRAW_: // drawvreg_yyy_xxx [set the pixel at [y][x] to the colour in reg]
+            case DRAW1: // drawrreg.reg-reg [set the pixel at [.reg][-reg] to the colour in reg]
 
             case NIF__: // nIf__regCodeLine [if (!reg) goto CodeLine]
             case GOTO_: // GoTo____CodeLine [goto CodeLine]
