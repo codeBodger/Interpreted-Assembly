@@ -69,7 +69,7 @@ int main() {
                 memory[code[line].address] = valueInReg;
             break;
             case MOVE1: // move<regAddresss [from Addresss to reg]
-                switch (code[line].reg) {
+                switch (valueInReg) {
                     case 0: aaa = memory[code[line].address]; break;
                     case 1: aab = memory[code[line].address]; break;
                     case 2: aba = memory[code[line].address]; break;
@@ -81,7 +81,7 @@ int main() {
                 }
             break;
             case PUT__: // put<<reg________Value... [value into reg]
-                switch (code[line].reg) {
+                switch (valueInReg) {
                     case 0: aaa = code[++line]; break;
                     case 1: aab = code[++line]; break;
                     case 2: aba = code[++line]; break;
@@ -100,29 +100,139 @@ int main() {
                 memory[code[line].address] = memory[(char)valueInReg];
             break;
             case MOVE3: // mov<<reg____.reg [from address in (char).reg to reg]
-                switch (code[line].reg) {
-                    case 0: aaa = valueInReg3; break;
-                    case 1: aab = valueInReg3; break;
-                    case 2: aba = valueInReg3; break;
-                    case 3: abb = valueInReg3; break;
-                    case 4: baa = valueInReg3; break;
-                    case 5: bab = valueInReg3; break;
-                    case 6: bba = valueInReg3; break;
-                    case 7: bbb = valueInReg3; break;
+                switch (valueInReg) {
+                    case 0: aaa = valueInReg2; break;
+                    case 1: aab = valueInReg2; break;
+                    case 2: aba = valueInReg2; break;
+                    case 3: abb = valueInReg2; break;
+                    case 4: baa = valueInReg2; break;
+                    case 5: bab = valueInReg2; break;
+                    case 6: bba = valueInReg2; break;
+                    case 7: bbb = valueInReg2; break;
                 }
             break;
             case SHFTL: // <<___reg.reg-reg [<<, like below]
+                switch (valueInReg) {
+                    case 0: aaa = valueInReg1 << valueInReg2; break;
+                    case 1: aab = valueInReg1 << valueInReg2; break;
+                    case 2: aba = valueInReg1 << valueInReg2; break;
+                    case 3: abb = valueInReg1 << valueInReg2; break;
+                    case 4: baa = valueInReg1 << valueInReg2; break;
+                    case 5: bab = valueInReg1 << valueInReg2; break;
+                    case 6: bba = valueInReg1 << valueInReg2; break;
+                    case 7: bbb = valueInReg1 << valueInReg2; break;
+                }
+            break;
             case SHFTR: // >>___
+                switch (valueInReg) {
+                    case 0: aaa = valueInReg1 >> valueInReg2; break;
+                    case 1: aab = valueInReg1 >> valueInReg2; break;
+                    case 2: aba = valueInReg1 >> valueInReg2; break;
+                    case 3: abb = valueInReg1 >> valueInReg2; break;
+                    case 4: baa = valueInReg1 >> valueInReg2; break;
+                    case 5: bab = valueInReg1 >> valueInReg2; break;
+                    case 6: bba = valueInReg1 >> valueInReg2; break;
+                    case 7: bbb = valueInReg1 >> valueInReg2; break;
+                }
+            break;
 
             case ADD__: // add__reg.reg-reg [put (.reg + -reg) into reg]
+                switch (valueInReg) {
+                    case 0: aaa = valueInReg1 + valueInReg2; break;
+                    case 1: aab = valueInReg1 + valueInReg2; break;
+                    case 2: aba = valueInReg1 + valueInReg2; break;
+                    case 3: abb = valueInReg1 + valueInReg2; break;
+                    case 4: baa = valueInReg1 + valueInReg2; break;
+                    case 5: bab = valueInReg1 + valueInReg2; break;
+                    case 6: bba = valueInReg1 + valueInReg2; break;
+                    case 7: bbb = valueInReg1 + valueInReg2; break;
+                }
+            break;
             case SUB__: // sub__
+                switch (valueInReg) {
+                    case 0: aaa = valueInReg1 - valueInReg2; break;
+                    case 1: aab = valueInReg1 - valueInReg2; break;
+                    case 2: aba = valueInReg1 - valueInReg2; break;
+                    case 3: abb = valueInReg1 - valueInReg2; break;
+                    case 4: baa = valueInReg1 - valueInReg2; break;
+                    case 5: bab = valueInReg1 - valueInReg2; break;
+                    case 6: bba = valueInReg1 - valueInReg2; break;
+                    case 7: bbb = valueInReg1 - valueInReg2; break;
+                }
+            break;
             case MULT_: // mult_
+                switch (valueInReg) {
+                    case 0: aaa = valueInReg1 * valueInReg2; break;
+                    case 1: aab = valueInReg1 * valueInReg2; break;
+                    case 2: aba = valueInReg1 * valueInReg2; break;
+                    case 3: abb = valueInReg1 * valueInReg2; break;
+                    case 4: baa = valueInReg1 * valueInReg2; break;
+                    case 5: bab = valueInReg1 * valueInReg2; break;
+                    case 6: bba = valueInReg1 * valueInReg2; break;
+                    case 7: bbb = valueInReg1 * valueInReg2; break;
+                }
+            break;
             case DIV__: // div__
+                switch (valueInReg) {
+                    case 0: aaa = valueInReg1 / valueInReg2; break;
+                    case 1: aab = valueInReg1 / valueInReg2; break;
+                    case 2: aba = valueInReg1 / valueInReg2; break;
+                    case 3: abb = valueInReg1 / valueInReg2; break;
+                    case 4: baa = valueInReg1 / valueInReg2; break;
+                    case 5: bab = valueInReg1 / valueInReg2; break;
+                    case 6: bba = valueInReg1 / valueInReg2; break;
+                    case 7: bbb = valueInReg1 / valueInReg2; break;
+                }
+            break;
 
             case AND__: // AND__reg.reg-reg [&, like above]
+                switch (valueInReg) {
+                    case 0: aaa = valueInReg1 & valueInReg2; break;
+                    case 1: aab = valueInReg1 & valueInReg2; break;
+                    case 2: aba = valueInReg1 & valueInReg2; break;
+                    case 3: abb = valueInReg1 & valueInReg2; break;
+                    case 4: baa = valueInReg1 & valueInReg2; break;
+                    case 5: bab = valueInReg1 & valueInReg2; break;
+                    case 6: bba = valueInReg1 & valueInReg2; break;
+                    case 7: bbb = valueInReg1 & valueInReg2; break;
+                }
+            break;
             case OR___: // OR___
+                switch (valueInReg) {
+                    case 0: aaa = valueInReg1 | valueInReg2; break;
+                    case 1: aab = valueInReg1 | valueInReg2; break;
+                    case 2: aba = valueInReg1 | valueInReg2; break;
+                    case 3: abb = valueInReg1 | valueInReg2; break;
+                    case 4: baa = valueInReg1 | valueInReg2; break;
+                    case 5: bab = valueInReg1 | valueInReg2; break;
+                    case 6: bba = valueInReg1 | valueInReg2; break;
+                    case 7: bbb = valueInReg1 | valueInReg2; break;
+                }
+            break;
             case NAND_: // NAND_
+                switch (valueInReg) {
+                    case 0: aaa = ~(valueInReg1 & valueInReg2); break;
+                    case 1: aab = ~(valueInReg1 & valueInReg2); break;
+                    case 2: aba = ~(valueInReg1 & valueInReg2); break;
+                    case 3: abb = ~(valueInReg1 & valueInReg2); break;
+                    case 4: baa = ~(valueInReg1 & valueInReg2); break;
+                    case 5: bab = ~(valueInReg1 & valueInReg2); break;
+                    case 6: bba = ~(valueInReg1 & valueInReg2); break;
+                    case 7: bbb = ~(valueInReg1 & valueInReg2); break;
+                }
+            break;
             case NOR__: // NOR__
+                switch (valueInReg) {
+                    case 0: aaa = ~(valueInReg1 | valueInReg2); break;
+                    case 1: aab = ~(valueInReg1 | valueInReg2); break;
+                    case 2: aba = ~(valueInReg1 | valueInReg2); break;
+                    case 3: abb = ~(valueInReg1 | valueInReg2); break;
+                    case 4: baa = ~(valueInReg1 | valueInReg2); break;
+                    case 5: bab = ~(valueInReg1 | valueInReg2); break;
+                    case 6: bba = ~(valueInReg1 | valueInReg2); break;
+                    case 7: bbb = ~(valueInReg1 | valueInReg2); break;
+                }
+            break;
 
             case DRAW2: // draw_reg.reg_xxx [set the pixel at [.reg][x] to the colour in reg]
             case DRAW3: // draw_reg_yyy-reg [set the pixel at [y][-reg] to the colour in reg]
