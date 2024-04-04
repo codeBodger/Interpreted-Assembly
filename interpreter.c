@@ -6,10 +6,17 @@
 #include "sense.h"
 
 #define SINGLE_OCTAL 0x0007
+#define ADDR 0x00ff
+#define REG  0x0700
+#define REG1 0x0070
+#define REG2 0x0007
+#define INST 0xf800
 
 #define BAD_REG 1
 #define BAD_INST 2
 #define STACK_UNDERFLOW 3
+#define NO_FILE_PROVIDED 4
+#define FILE_NOT_FOUND 5
 
 pi_framebuffer_t *fb;
 sense_fb_bitmap_t *bm;
@@ -19,19 +26,17 @@ typedef struct StackElement {
     struct StackElement* previous;
 } StackElement;
 
-typedef struct Line {
-    unsigned int instruction : 5;
-    unsigned int reg : 3;
-    unsigned int address : 8;
-} Line;
-
 void end(short exitcode);
 
-Line code[256];
+short code[256];
 short memory[256];
 
-int main() {
-    printf("Line: %ld\nshort: %ld\n", sizeof(Line), sizeof(short));
+int main(int argc, char *argv[]) {
+    if (argc != 2) return NO_FILE_PROVIDED;
+    FILE* source = fopen(argv[1], "rb");
+    if (source == NULL) return FILE_NOT_FOUND;
+    fread(code, sizeof(short), sizeof(code), source);
+
 	if (fb == NULL && bm == NULL) {
         fb = getFrameBuffer();
         bm = fb->bitmap;
@@ -56,7 +61,7 @@ int main() {
     register short valueInReg2;
 
     while (1) {
-        switch (code[line].reg) {
+        switch ((code[line] & REG) >> 8) {
             case 0: valueInReg = aaa; break;
             case 1: valueInReg = aab; break;
             case 2: valueInReg = aba; break;
@@ -67,7 +72,7 @@ int main() {
             case 7: valueInReg = bbb; break;
             default: end(BAD_REG);
         }
-        switch ((code[line].address >> 4) & SINGLE_OCTAL) {
+        switch ((code[line] & REG1) >> 4) {
             case 0: valueInReg1 = aaa; break;
             case 1: valueInReg1 = aab; break;
             case 2: valueInReg1 = aba; break;
@@ -78,7 +83,7 @@ int main() {
             case 7: valueInReg1 = bbb; break;
             default: end(BAD_REG);
         }
-        switch (code[line].address & SINGLE_OCTAL) {
+        switch (code[line] & REG2) {
             case 0: valueInReg2 = aaa; break;
             case 1: valueInReg2 = aab; break;
             case 2: valueInReg2 = aba; break;
@@ -90,43 +95,43 @@ int main() {
             default: end(BAD_REG);
         }
 
-        switch (code[line].instruction) {
+        switch ((code[line] & INST) >> 11) {
             case MOVE_: // move>regAddresss [from reg to Addresss]
-                memory[code[line].address] = valueInReg;
+                memory[code[line] & ADDR] = valueInReg;
             break;
             case MOVE1: // move<regAddresss [from Addresss to reg]
-                switch (code[line].address) {
-                    case 0: aaa = memory[code[line].address]; break;
-                    case 1: aab = memory[code[line].address]; break;
-                    case 2: aba = memory[code[line].address]; break;
-                    case 3: abb = memory[code[line].address]; break;
-                    case 4: baa = memory[code[line].address]; break;
-                    case 5: bab = memory[code[line].address]; break;
-                    case 6: bba = memory[code[line].address]; break;
-                    case 7: bbb = memory[code[line].address]; break;
+                switch ((code[line] & REG) >> 8) {
+                    case 0: aaa = memory[code[line] & ADDR]; break;
+                    case 1: aab = memory[code[line] & ADDR]; break;
+                    case 2: aba = memory[code[line] & ADDR]; break;
+                    case 3: abb = memory[code[line] & ADDR]; break;
+                    case 4: baa = memory[code[line] & ADDR]; break;
+                    case 5: bab = memory[code[line] & ADDR]; break;
+                    case 6: bba = memory[code[line] & ADDR]; break;
+                    case 7: bbb = memory[code[line] & ADDR]; break;
                 }
             break;
-            // case PUT__: // put<<reg________Value... [value into reg]
-            //     switch (code[line].address) {
-            //         case 0: aaa = (short)code[++line]; break;
-            //         case 1: aab = (short)code[++line]; break;
-            //         case 2: aba = (short)code[++line]; break;
-            //         case 3: abb = (short)code[++line]; break;
-            //         case 4: baa = (short)code[++line]; break;
-            //         case 5: bab = (short)code[++line]; break;
-            //         case 6: bba = (short)code[++line]; break;
-            //         case 7: bbb = (short)code[++line]; break;
-            //     }
-            // break;
-            // case PUT1_: // put<____AddresssValue... [value into Addresss]
-            //     memory[code[line].address] = code[++line];
-            // break;
+            case PUT__: // put<<reg________Value... [value into reg]
+                switch ((code[line] & REG) >> 8) {
+                    case 0: aaa = code[++line]; break;
+                    case 1: aab = code[++line]; break;
+                    case 2: aba = code[++line]; break;
+                    case 3: abb = code[++line]; break;
+                    case 4: baa = code[++line]; break;
+                    case 5: bab = code[++line]; break;
+                    case 6: bba = code[++line]; break;
+                    case 7: bbb = code[++line]; break;
+                }
+            break;
+            case PUT1_: // put<____AddresssValue... [value into Addresss]
+                memory[code[line] & ADDR] = code[++line];
+            break;
         
             case MOVE2: // mov>>regAddresss [from address in (char)reg to Address]
-                memory[code[line].address] = memory[(char)valueInReg];
+                memory[code[line] & ADDR] = memory[(char)valueInReg];
             break;
             case MOVE3: // mov<<reg____.reg [from address in (char).reg to reg]
-                switch (code[line].address) {
+                switch ((code[line] & REG) >> 8) {
                     case 0: aaa = valueInReg2; break;
                     case 1: aab = valueInReg2; break;
                     case 2: aba = valueInReg2; break;
@@ -138,7 +143,7 @@ int main() {
                 }
             break;
             case SHFTL: // <<___reg.reg-reg [<<, like below]
-                switch (code[line].address) {
+                switch ((code[line] & REG) >> 8) {
                     case 0: aaa = valueInReg1 << valueInReg2; break;
                     case 1: aab = valueInReg1 << valueInReg2; break;
                     case 2: aba = valueInReg1 << valueInReg2; break;
@@ -150,7 +155,7 @@ int main() {
                 }
             break;
             case SHFTR: // >>___
-                switch (code[line].address) {
+                switch ((code[line] & REG) >> 8) {
                     case 0: aaa = valueInReg1 >> valueInReg2; break;
                     case 1: aab = valueInReg1 >> valueInReg2; break;
                     case 2: aba = valueInReg1 >> valueInReg2; break;
@@ -163,7 +168,7 @@ int main() {
             break;
 
             case ADD__: // add__reg.reg-reg [put (.reg + -reg) into reg]
-                switch (code[line].address) {
+                switch ((code[line] & REG) >> 8) {
                     case 0: aaa = valueInReg1 + valueInReg2; break;
                     case 1: aab = valueInReg1 + valueInReg2; break;
                     case 2: aba = valueInReg1 + valueInReg2; break;
@@ -175,7 +180,7 @@ int main() {
                 }
             break;
             case SUB__: // sub__
-                switch (code[line].address) {
+                switch ((code[line] & REG) >> 8) {
                     case 0: aaa = valueInReg1 - valueInReg2; break;
                     case 1: aab = valueInReg1 - valueInReg2; break;
                     case 2: aba = valueInReg1 - valueInReg2; break;
@@ -187,7 +192,7 @@ int main() {
                 }
             break;
             case MULT_: // mult_
-                switch (code[line].address) {
+                switch ((code[line] & REG) >> 8) {
                     case 0: aaa = valueInReg1 * valueInReg2; break;
                     case 1: aab = valueInReg1 * valueInReg2; break;
                     case 2: aba = valueInReg1 * valueInReg2; break;
@@ -199,7 +204,7 @@ int main() {
                 }
             break;
             case DIV__: // div__
-                switch (code[line].address) {
+                switch ((code[line] & REG) >> 8) {
                     case 0: aaa = valueInReg1 / valueInReg2; break;
                     case 1: aab = valueInReg1 / valueInReg2; break;
                     case 2: aba = valueInReg1 / valueInReg2; break;
@@ -212,7 +217,7 @@ int main() {
             break;
 
             case AND__: // AND__reg.reg-reg [&, like above]
-                switch (code[line].address) {
+                switch ((code[line] & REG) >> 8) {
                     case 0: aaa = valueInReg1 & valueInReg2; break;
                     case 1: aab = valueInReg1 & valueInReg2; break;
                     case 2: aba = valueInReg1 & valueInReg2; break;
@@ -224,7 +229,7 @@ int main() {
                 }
             break;
             case OR___: // OR___
-                switch (code[line].address) {
+                switch ((code[line] & REG) >> 8) {
                     case 0: aaa = valueInReg1 | valueInReg2; break;
                     case 1: aab = valueInReg1 | valueInReg2; break;
                     case 2: aba = valueInReg1 | valueInReg2; break;
@@ -236,7 +241,7 @@ int main() {
                 }
             break;
             case NAND_: // NAND_
-                switch (code[line].address) {
+                switch ((code[line] & REG) >> 8) {
                     case 0: aaa = ~(valueInReg1 & valueInReg2); break;
                     case 1: aab = ~(valueInReg1 & valueInReg2); break;
                     case 2: aba = ~(valueInReg1 & valueInReg2); break;
@@ -248,7 +253,7 @@ int main() {
                 }
             break;
             case NOR__: // NOR__
-                switch (code[line].address) {
+                switch ((code[line] & REG) >> 8) {
                     case 0: aaa = ~(valueInReg1 | valueInReg2); break;
                     case 1: aab = ~(valueInReg1 | valueInReg2); break;
                     case 2: aba = ~(valueInReg1 | valueInReg2); break;
@@ -261,14 +266,14 @@ int main() {
             break;
 
             case DRAW2: // draw_reg.reg_xxx [set the pixel at [.reg][x] to the colour in reg]
-                bm->pixel[valueInReg1 & SINGLE_OCTAL][code[line].address & SINGLE_OCTAL] = valueInReg;
+                bm->pixel[valueInReg1 & SINGLE_OCTAL][code[line] & ADDR & SINGLE_OCTAL] = valueInReg;
             break;
             case DRAW3: // draw_reg_yyy-reg [set the pixel at [y][-reg] to the colour in reg]
-                bm->pixel[(code[line].address >> 4) & SINGLE_OCTAL][valueInReg2 & SINGLE_OCTAL] = valueInReg;
+                bm->pixel[(code[line] & ADDR >> 4) & SINGLE_OCTAL][valueInReg2 & SINGLE_OCTAL] = valueInReg;
             break;
             case IF_GO: // if___regCodeLine [if (reg) goto CodeLine]
                 if (valueInReg) {
-                    line = code[line].address;
+                    line = code[line] & ADDR;
                     continue; //to avoid incrementing
                 }
             break;
@@ -284,7 +289,7 @@ int main() {
                 if (top->previous == NULL) end(STACK_UNDERFLOW);
                 next = top;
                 top = top->previous;
-                switch (code[line].address) {
+                switch ((code[line] & REG) >> 8) {
                     case 0: aaa = top->value;
                     case 1: aab = top->value;
                     case 2: aba = top->value;
@@ -300,20 +305,20 @@ int main() {
                 bm->pixel[valueInReg1 & SINGLE_OCTAL][valueInReg2 & SINGLE_OCTAL] = valueInReg;
             break;
             case DRAW1: // drawrreg.reg-reg [set the pixel at [.reg][-reg] to the colour in reg]
-                bm->pixel[(code[line].address >> 4) & SINGLE_OCTAL][code[line].address & SINGLE_OCTAL] = valueInReg;
+                bm->pixel[(code[line] & ADDR >> 4) & SINGLE_OCTAL][code[line] & ADDR & SINGLE_OCTAL] = valueInReg;
             break;
 
             case NIF__: // nIf__regCodeLine [if (!reg) goto CodeLine]
                 if (!valueInReg) {
-                    line = code[line].address;
+                    line = code[line] & ADDR;
                     continue;
                 }
             break;
             case GOTO_: // GoTo____CodeLine [goto CodeLine]
-                line = code[line].address;
+                line = code[line] & ADDR;
             continue;
             case EXIT1: // exitv___value___ [exit with code value___]
-                end(code[line].address);
+                end(code[line] & ADDR);
             case EXIT_: // exitrreg________ [exit with code in reg]
                 end(valueInReg);
             
