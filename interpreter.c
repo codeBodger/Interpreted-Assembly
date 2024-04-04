@@ -1,15 +1,23 @@
 #include "instructions.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include "libsense/sense.h"
 
 #define SINGLE_OCTAL 0x0007
+
 #define BAD_REG 1
 #define BAD_INST 2
+#define STACK_UNDERFLOW 3
 
 pi_framebuffer_t *fb;
 sense_fb_bitmap_t *bm;
+
+typedef struct StackElement {
+    short value;
+    struct StackElement* previous;
+} StackElement;
 
 struct Line {
     unsigned int instruction : 5;
@@ -27,6 +35,9 @@ int main() {
         fb = getFrameBuffer();
         bm = fb->bitmap;
     }
+
+    StackElement* top = malloc(sizeof(StackElement));
+        top->previous = NULL;
 
     register short aaa;
     register short aab;
@@ -262,7 +273,27 @@ int main() {
             // case _____: //
 
             case PUSH_: // push_reg________ [push the value in reg onto the stack]
+                top->value = valueInReg;
+                StackElement* next = malloc(sizeof(StackElement));
+                next->previous = top;
+                top = next;
+            break;
             case POP__: // pop__reg________ [pop the first value off of the stack and put it into reg]
+                if (top->previous == NULL) end(STACK_UNDERFLOW);
+                StackElement* next = top;
+                top = top->previous;
+                switch(valueInReg) {
+                    case 0: aaa = top->value;
+                    case 1: aab = top->value;
+                    case 2: aba = top->value;
+                    case 3: abb = top->value;
+                    case 4: baa = top->value;
+                    case 5: bab = top->value;
+                    case 6: bba = top->value;
+                    case 7: bbb = top->value;
+                }
+                free(next);
+            break;
             case DRAW_: // drawvreg_yyy_xxx [set the pixel at [y][x] to the colour in reg]
                 bm->pixel[valueInReg1 & SINGLE_OCTAL][valueInReg2 & SINGLE_OCTAL] = valueInReg;
             break;
