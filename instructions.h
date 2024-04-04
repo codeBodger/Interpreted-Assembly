@@ -25,5 +25,5 @@
 
 #define NIF__ 0b11100 // nIf__regCodeLine [if (!reg) goto CodeLine]
 #define GOTO_ 0b11101 // GoTo____CodeLine [goto CodeLine]
-#define ____1 0b11110 //
-#define EXIT_ 0b11111 // exit_reg________ [exit with code in reg]
+#define EXIT1 0b11110 // exitv___value___ [exit with code value___]
+#define EXIT_ 0b11111 // exitrreg________ [exit with code in reg]

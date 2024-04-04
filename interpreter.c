@@ -53,8 +53,8 @@ int main() {
 
             case NIF__: // nIf__regCodeLine [if (!reg) goto CodeLine]
             case GOTO_: // GoTo____CodeLine [goto CodeLine]
-            case ____1: //
-            case EXIT_: // exit_reg________ [exit with code in reg]
+            case EXIT1: // exitv___value___ [exit with code value___]
+            case EXIT_: // exitrreg________ [exit with code in reg]
         }
         line++;
     }
