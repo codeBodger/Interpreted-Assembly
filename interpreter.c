@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include "libsense/sense.h"
 
-#define ADDRESS2REG 0b00000111
+#define SINGLE_OCTAL 0x0007
 #define BAD_REG 1
 #define BAD_INST 2
 
@@ -54,7 +54,7 @@ int main() {
             case 7: valueInReg = bbb; break;
             default: end(BAD_REG);
         }
-        switch ((code[line].address >> 4) & ADDRESS2REG) {
+        switch ((code[line].address >> 4) & SINGLE_OCTAL) {
             case 0: valueInReg1 = aaa; break;
             case 1: valueInReg1 = aab; break;
             case 2: valueInReg1 = aba; break;
@@ -65,7 +65,7 @@ int main() {
             case 7: valueInReg1 = bbb; break;
             default: end(BAD_REG);
         }
-        switch (code[line].address & ADDRESS2REG) {
+        switch (code[line].address & SINGLE_OCTAL) {
             case 0: valueInReg2 = aaa; break;
             case 1: valueInReg2 = aab; break;
             case 2: valueInReg2 = aba; break;
@@ -248,7 +248,11 @@ int main() {
             break;
 
             case DRAW2: // draw_reg.reg_xxx [set the pixel at [.reg][x] to the colour in reg]
+                bm->pixel[valueInReg1 & SINGLE_OCTAL][code[line].address & SINGLE_OCTAL] = valueInReg;
+            break;
             case DRAW3: // draw_reg_yyy-reg [set the pixel at [y][-reg] to the colour in reg]
+                bm->pixel[(code[line].address >> 4) & SINGLE_OCTAL][valueInReg2 & SINGLE_OCTAL] = valueInReg;
+            break;
             case IF_GO: // if___regCodeLine [if (reg) goto CodeLine]
                 if (valueInReg) {
                     line = code[line].address;
@@ -260,7 +264,11 @@ int main() {
             case PUSH_: // push_reg________ [push the value in reg onto the stack]
             case POP__: // pop__reg________ [pop the first value off of the stack and put it into reg]
             case DRAW_: // drawvreg_yyy_xxx [set the pixel at [y][x] to the colour in reg]
+                bm->pixel[valueInReg1 & SINGLE_OCTAL][valueInReg2 & SINGLE_OCTAL] = valueInReg;
+            break;
             case DRAW1: // drawrreg.reg-reg [set the pixel at [.reg][-reg] to the colour in reg]
+                bm->pixel[(code[line].address >> 4) & SINGLE_OCTAL][code[line].address & SINGLE_OCTAL] = valueInReg;
+            break;
 
             case NIF__: // nIf__regCodeLine [if (!reg) goto CodeLine]
                 if (!valueInReg) {
@@ -276,7 +284,7 @@ int main() {
             case EXIT_: // exitrreg________ [exit with code in reg]
                 end(valueInReg);
             
-            default: goto badInst;
+            default: end(BAD_INST);
         }
         line++;
     }
