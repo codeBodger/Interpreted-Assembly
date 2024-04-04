@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "libsense/sense.h"
+#include "sense.h"
 
 #define SINGLE_OCTAL 0x0007
 
