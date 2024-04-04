@@ -39,7 +39,7 @@ def compile(lines: list[str]) -> list[bytes]:
             finding_value = False
         except BadLine:
             print('\033[0;35m' "Warning" '\033[00m' f": line {len(compiled)} is invalid:\n"
-                  "\t{line}")
+                  f"\t{line}")
             continue
         except RequiresValue as e:
             l = e.line
