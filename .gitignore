@@ -56,3 +56,7 @@ __pycache__/
 
 # VSCode stuff
 .vscode/
+
+# Custom source/binaries
+*.piout
+*.pi
