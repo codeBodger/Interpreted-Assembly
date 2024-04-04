@@ -93,7 +93,7 @@ int main() {
                 memory[code[line].address] = valueInReg;
             break;
             case MOVE1: // move<regAddresss [from Addresss to reg]
-                switch (valueInReg) {
+                switch (code[line].address) {
                     case 0: aaa = memory[code[line].address]; break;
                     case 1: aab = memory[code[line].address]; break;
                     case 2: aba = memory[code[line].address]; break;
@@ -105,7 +105,7 @@ int main() {
                 }
             break;
             case PUT__: // put<<reg________Value... [value into reg]
-                switch (valueInReg) {
+                switch (code[line].address) {
                     case 0: aaa = code[++line]; break;
                     case 1: aab = code[++line]; break;
                     case 2: aba = code[++line]; break;
@@ -124,7 +124,7 @@ int main() {
                 memory[code[line].address] = memory[(char)valueInReg];
             break;
             case MOVE3: // mov<<reg____.reg [from address in (char).reg to reg]
-                switch (valueInReg) {
+                switch (code[line].address) {
                     case 0: aaa = valueInReg2; break;
                     case 1: aab = valueInReg2; break;
                     case 2: aba = valueInReg2; break;
@@ -136,7 +136,7 @@ int main() {
                 }
             break;
             case SHFTL: // <<___reg.reg-reg [<<, like below]
-                switch (valueInReg) {
+                switch (code[line].address) {
                     case 0: aaa = valueInReg1 << valueInReg2; break;
                     case 1: aab = valueInReg1 << valueInReg2; break;
                     case 2: aba = valueInReg1 << valueInReg2; break;
@@ -148,7 +148,7 @@ int main() {
                 }
             break;
             case SHFTR: // >>___
-                switch (valueInReg) {
+                switch (code[line].address) {
                     case 0: aaa = valueInReg1 >> valueInReg2; break;
                     case 1: aab = valueInReg1 >> valueInReg2; break;
                     case 2: aba = valueInReg1 >> valueInReg2; break;
@@ -161,7 +161,7 @@ int main() {
             break;
 
             case ADD__: // add__reg.reg-reg [put (.reg + -reg) into reg]
-                switch (valueInReg) {
+                switch (code[line].address) {
                     case 0: aaa = valueInReg1 + valueInReg2; break;
                     case 1: aab = valueInReg1 + valueInReg2; break;
                     case 2: aba = valueInReg1 + valueInReg2; break;
@@ -173,7 +173,7 @@ int main() {
                 }
             break;
             case SUB__: // sub__
-                switch (valueInReg) {
+                switch (code[line].address) {
                     case 0: aaa = valueInReg1 - valueInReg2; break;
                     case 1: aab = valueInReg1 - valueInReg2; break;
                     case 2: aba = valueInReg1 - valueInReg2; break;
@@ -185,7 +185,7 @@ int main() {
                 }
             break;
             case MULT_: // mult_
-                switch (valueInReg) {
+                switch (code[line].address) {
                     case 0: aaa = valueInReg1 * valueInReg2; break;
                     case 1: aab = valueInReg1 * valueInReg2; break;
                     case 2: aba = valueInReg1 * valueInReg2; break;
@@ -197,7 +197,7 @@ int main() {
                 }
             break;
             case DIV__: // div__
-                switch (valueInReg) {
+                switch (code[line].address) {
                     case 0: aaa = valueInReg1 / valueInReg2; break;
                     case 1: aab = valueInReg1 / valueInReg2; break;
                     case 2: aba = valueInReg1 / valueInReg2; break;
@@ -210,7 +210,7 @@ int main() {
             break;
 
             case AND__: // AND__reg.reg-reg [&, like above]
-                switch (valueInReg) {
+                switch (code[line].address) {
                     case 0: aaa = valueInReg1 & valueInReg2; break;
                     case 1: aab = valueInReg1 & valueInReg2; break;
                     case 2: aba = valueInReg1 & valueInReg2; break;
@@ -222,7 +222,7 @@ int main() {
                 }
             break;
             case OR___: // OR___
-                switch (valueInReg) {
+                switch (code[line].address) {
                     case 0: aaa = valueInReg1 | valueInReg2; break;
                     case 1: aab = valueInReg1 | valueInReg2; break;
                     case 2: aba = valueInReg1 | valueInReg2; break;
@@ -234,7 +234,7 @@ int main() {
                 }
             break;
             case NAND_: // NAND_
-                switch (valueInReg) {
+                switch (code[line].address) {
                     case 0: aaa = ~(valueInReg1 & valueInReg2); break;
                     case 1: aab = ~(valueInReg1 & valueInReg2); break;
                     case 2: aba = ~(valueInReg1 & valueInReg2); break;
@@ -246,7 +246,7 @@ int main() {
                 }
             break;
             case NOR__: // NOR__
-                switch (valueInReg) {
+                switch (code[line].address) {
                     case 0: aaa = ~(valueInReg1 | valueInReg2); break;
                     case 1: aab = ~(valueInReg1 | valueInReg2); break;
                     case 2: aba = ~(valueInReg1 | valueInReg2); break;
@@ -282,7 +282,7 @@ int main() {
                 if (top->previous == NULL) end(STACK_UNDERFLOW);
                 StackElement* next = top;
                 top = top->previous;
-                switch(valueInReg) {
+                switch (code[line].address) {
                     case 0: aaa = top->value;
                     case 1: aab = top->value;
                     case 2: aba = top->value;
