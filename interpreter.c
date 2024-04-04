@@ -19,23 +19,25 @@ typedef struct StackElement {
     struct StackElement* previous;
 } StackElement;
 
-struct Line {
+typedef struct Line {
     unsigned int instruction : 5;
     unsigned int reg : 3;
     unsigned int address : 8;
-};
+} Line;
 
 void end(short exitcode);
 
-struct Line code[256];
+Line code[256];
 short memory[256];
 
 int main() {
+    printf("Line: %ld\nshort: %ld\n", sizeof(Line), sizeof(short));
 	if (fb == NULL && bm == NULL) {
         fb = getFrameBuffer();
         bm = fb->bitmap;
     }
 
+    StackElement* next;
     StackElement* top = malloc(sizeof(StackElement));
         top->previous = NULL;
 
@@ -104,21 +106,21 @@ int main() {
                     case 7: bbb = memory[code[line].address]; break;
                 }
             break;
-            case PUT__: // put<<reg________Value... [value into reg]
-                switch (code[line].address) {
-                    case 0: aaa = code[++line]; break;
-                    case 1: aab = code[++line]; break;
-                    case 2: aba = code[++line]; break;
-                    case 3: abb = code[++line]; break;
-                    case 4: baa = code[++line]; break;
-                    case 5: bab = code[++line]; break;
-                    case 6: bba = code[++line]; break;
-                    case 7: bbb = code[++line]; break;
-                }
-            break;
-            case PUT1_: // put<____AddresssValue... [value into Addresss]
-                memory[code[line].address] = code[++line];
-            break;
+            // case PUT__: // put<<reg________Value... [value into reg]
+            //     switch (code[line].address) {
+            //         case 0: aaa = (short)code[++line]; break;
+            //         case 1: aab = (short)code[++line]; break;
+            //         case 2: aba = (short)code[++line]; break;
+            //         case 3: abb = (short)code[++line]; break;
+            //         case 4: baa = (short)code[++line]; break;
+            //         case 5: bab = (short)code[++line]; break;
+            //         case 6: bba = (short)code[++line]; break;
+            //         case 7: bbb = (short)code[++line]; break;
+            //     }
+            // break;
+            // case PUT1_: // put<____AddresssValue... [value into Addresss]
+            //     memory[code[line].address] = code[++line];
+            // break;
         
             case MOVE2: // mov>>regAddresss [from address in (char)reg to Address]
                 memory[code[line].address] = memory[(char)valueInReg];
@@ -274,13 +276,13 @@ int main() {
 
             case PUSH_: // push_reg________ [push the value in reg onto the stack]
                 top->value = valueInReg;
-                StackElement* next = malloc(sizeof(StackElement));
+                next = malloc(sizeof(StackElement));
                 next->previous = top;
                 top = next;
             break;
             case POP__: // pop__reg________ [pop the first value off of the stack and put it into reg]
                 if (top->previous == NULL) end(STACK_UNDERFLOW);
-                StackElement* next = top;
+                next = top;
                 top = top->previous;
                 switch (code[line].address) {
                     case 0: aaa = top->value;
@@ -326,7 +328,6 @@ int main() {
 
 void end(short exitcode) {
     if (fb != NULL) {
-        clearFrameBuffer(fb,BLANK);
         freeFrameBuffer(fb);
     }
     sleep(1);
