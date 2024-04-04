@@ -1,9 +1,15 @@
 #include "instructions.h"
 
 #include <stdio.h>
+#include <unistd.h>
 #include "libsense/sense.h"
 
 #define ADDRESS2REG 0b00000111
+#define BAD_REG 1
+#define BAD_INST 2
+
+pi_framebuffer_t *fb;
+sense_fb_bitmap_t *bm;
 
 struct Line {
     unsigned int instruction : 5;
@@ -11,10 +17,17 @@ struct Line {
     unsigned int address : 8;
 };
 
+void end(short exitcode);
+
 struct Line code[256];
 short memory[256];
 
 int main() {
+	if (fb == NULL && bm == NULL) {
+        fb = getFrameBuffer();
+        bm = fb->bitmap;
+    }
+
     register short aaa;
     register short aab;
     register short aba;
@@ -39,7 +52,7 @@ int main() {
             case 5: valueInReg = bab; break;
             case 6: valueInReg = bba; break;
             case 7: valueInReg = bbb; break;
-            default: return 1;
+            default: end(BAD_REG);
         }
         switch ((code[line].address >> 4) & ADDRESS2REG) {
             case 0: valueInReg1 = aaa; break;
@@ -50,7 +63,7 @@ int main() {
             case 5: valueInReg1 = bab; break;
             case 6: valueInReg1 = bba; break;
             case 7: valueInReg1 = bbb; break;
-            default: return 1;
+            default: end(BAD_REG);
         }
         switch (code[line].address & ADDRESS2REG) {
             case 0: valueInReg2 = aaa; break;
@@ -61,7 +74,7 @@ int main() {
             case 5: valueInReg2 = bab; break;
             case 6: valueInReg2 = bba; break;
             case 7: valueInReg2 = bbb; break;
-            default: return 1;
+            default: end(BAD_REG);
         }
 
         switch (code[line].instruction) {
@@ -237,7 +250,12 @@ int main() {
             case DRAW2: // draw_reg.reg_xxx [set the pixel at [.reg][x] to the colour in reg]
             case DRAW3: // draw_reg_yyy-reg [set the pixel at [y][-reg] to the colour in reg]
             case IF_GO: // if___regCodeLine [if (reg) goto CodeLine]
-            case _____: //
+                if (valueInReg) {
+                    line = code[line].address;
+                    continue; //to avoid incrementing
+                }
+            break;
+            // case _____: //
 
             case PUSH_: // push_reg________ [push the value in reg onto the stack]
             case POP__: // pop__reg________ [pop the first value off of the stack and put it into reg]
@@ -245,12 +263,35 @@ int main() {
             case DRAW1: // drawrreg.reg-reg [set the pixel at [.reg][-reg] to the colour in reg]
 
             case NIF__: // nIf__regCodeLine [if (!reg) goto CodeLine]
+                if (!valueInReg) {
+                    line = code[line].address;
+                    continue;
+                }
+            break;
             case GOTO_: // GoTo____CodeLine [goto CodeLine]
+                line = code[line].address;
+            continue;
             case EXIT1: // exitv___value___ [exit with code value___]
+                end(code[line].address);
             case EXIT_: // exitrreg________ [exit with code in reg]
+                end(valueInReg);
+            
+            default: goto badInst;
         }
         line++;
     }
 
+    end(0);
     return 0;
+}
+
+void end(short exitcode) {
+    if (fb != NULL) {
+        clearFrameBuffer(fb,BLANK);
+        freeFrameBuffer(fb);
+    }
+    sleep(1);
+    fb = NULL; bm = NULL;
+
+    exit(exitcode);
 }
