@@ -73,7 +73,8 @@ class Line:
         ]
     
     def to_bytes(self) -> bytes:
-        return int.to_bytes(self.full[0]) + int.to_bytes(self.full[1])
+        # Python thinks that this puts the bytes in the wrong order, but somehow this fixes it
+        return int.to_bytes(self.full[1]) + int.to_bytes(self.full[0])
 
 
 class RequiresValue(Exception):
