@@ -32,9 +32,9 @@ short code[256];
 short memory[256];
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) return NO_FILE_PROVIDED;
+    if (argc != 2) end(NO_FILE_PROVIDED);
     FILE* source = fopen(argv[1], "rb");
-    if (source == NULL) return FILE_NOT_FOUND;
+    if (source == NULL) end(FILE_NOT_FOUND);
     fread(code, sizeof(short), sizeof(code), source);
 
 	if (fb == NULL && bm == NULL) {
