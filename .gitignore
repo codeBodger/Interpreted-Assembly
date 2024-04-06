@@ -60,3 +60,6 @@ __pycache__/
 # Custom source/binaries
 *.piout
 *.pi
+
+# Custom extention for use with gdb
+*.g
